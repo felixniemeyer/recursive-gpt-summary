@@ -16,13 +16,11 @@ parser.add_argument('-s', '--startswith', type=str, help='Read only files that s
 parser.add_argument('-t', '--target', type=str, help='Target directory for output files', required=True)
 
 parser.add_argument('-pp', '--prepromt', type=str, help='Prompt text before each chunk', required=False, 
-                    default='Summarize the following text in first person.')
-
-parser.add_argument('-co', '--continuation', type=str, help='Prompt text before each chunk', required=False, 
-                    default='The following text is a continuation of the text you summarized before. Continue your summary in first person.')
+                    default='Fasse diesen Text in der Ich-Perspektive zusammen.')
 
 parser.add_argument('-cp', '--contextpromt', type=str, help='Target directory for output files', required=False, 
-                    default='Here is what you have summarized previously: ')
+                    default='Hier ist das Ende der vorherigen Zusammenfassung: <context> Schließe daran an.')
+
 parser.add_argument('-ol', '--overlap', type=int, help='Number of chars to overlap', required=False, 
                     default=300)
 parser.add_argument('-cl', '--context', type=int, help='Number of chars from previous summary as context', 
@@ -31,7 +29,7 @@ parser.add_argument('-c', '--chunksize', type=int, help='Target chunk size in to
                     default=2500)
 # factor has to be less than 1
 parser.add_argument('-f', '--factor', type=int, help='Factor by which chatGPT should reduce by summary', required=False, 
-                    default=0.5)
+                    default=0.33)
 
 args = parser.parse_args()
 
@@ -40,13 +38,14 @@ if(target_char_count < args.overlap):
     print("Overlap has to be smaller than target summary size")
     exit(1)
 
-target_word_count = target_char_count / 5
-
 if(args.factor < 0.05 or args.factor > 0.75):
     print("Factor has to be between 0.05 and 0.5")
     exit(1)
 
-condense_prompt = "Try to use around <wc> words and keep the summary in first person!"
+if(args.target[-1] != '/'):
+    args.target += '/'
+
+condense_prompt = "Verwende etwa <wc> Wörter und schreibe in der Ich-Perspektive"
 
 Path(args.target).mkdir(parents=True, exist_ok=True)
 
@@ -57,25 +56,24 @@ def summarize(context, thoughts, outfile):
 
     messages = []
 
+    messages.append({
+        "role": "user", "content": thoughts
+    }) 
+    messages.append({
+        "role": "system", "content": args.prepromt
+    }) 
+
     if(len(context) > 0):
         messages.append({
-            "role": "system", "content": args.contextpromt + context
+            "role": "system", "content": args.contextpromt.replace("<context>", context)
         }) 
-        messages.append({
-            "role": "system", "content": args.continuation
-        }) 
-    else:
-        messages.append({
-            "role": "system", "content": args.prepromt
-        }) 
+
+    target_word_count = len(thoughts) / 5 * args.factor
+    target_word_count = int(target_word_count / 50) * 50
 
     messages.append({
         "role": "system", "content": condense_prompt.replace("<wc>", str(target_word_count))
     })
-
-    messages.append({
-        "role": "user", "content": thoughts
-    }) 
 
     print("Prompts: ", messages)
 

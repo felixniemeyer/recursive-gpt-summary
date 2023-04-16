@@ -1,0 +1,24 @@
+@import './base.css';
+
+#app {
+  margin: 0;
+  padding: 0rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: rgb(60, 170, 255);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    color: rgb(130, 220, 255);
+  }
+}
+
+body {
+  place-items: center;
+}

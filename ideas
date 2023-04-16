@@ -1,0 +1,63 @@
+# more
+- way to pick up process, when chatgpt has caused an error
+
+# location...
+- es wäre eigentlich super, 
+  - wenn man für jede datei 
+    - den start und 
+    - exklusiven end character kennen würde
+  - und dazu ein index pro level
+    - dass man anhand eines progress die datei bestimmen kann
+
+# mindalys fusion => V2
+- const kernel über die Wörter bewegen
+- kernel size 5% oder so
+- wörter colorhash 
+
+- 2 passes: 
+  - word count
+    - an Sonderzeichen brechen
+    - lower case
+    - finish up 
+      - threshold 
+        - mindestens 10 occurences oder so
+        - wieder params parser benutzen
+      - calculate frequency
+  
+  - local word count (kernel) 
+    - only relevant words
+    - relative frequency
+    - threshold
+      - die K wörter mit der größten Varianz in der relative frequency
+      - an der Stelle mit max threshold auch das label platzieren
+      - in der entsprechenden Farbe
+
+  - Dateien immer eine nach der anderen einlesen (soll für große Datenmengen funktionieren) 
+    - create index file
+      - char range => file
+
+- SVG generieren
+  - vertikal: wörter passen so gut übereinander
+  - links alpha = 0, rechts alpha = 1
+  - Y-Achse = character count
+
+# initial
+- load openai-key from .env file
+  - I leaked my key again!
+
+- optional: parse the file name
+
+- write vue frontend that serves the files
+  - folder structure: 
+    - original ("level 0") 
+      - contains original diary entries
+    - level folder
+        - contains summary files numbered from 0 to n
+    - tree files
+      - children.json contains nested arrays for children
+      - parents.json contains parent for every node
+    - file id: '<level>/<filename>'
+      - e.g. 
+        - 'original/2020-01-01.txt'
+        - or '1/0': Level 1, first summary file
+

@@ -1,0 +1,4 @@
+#indent 4 or python files
+[*.py]
+indent_style = space
+indent_size = 4

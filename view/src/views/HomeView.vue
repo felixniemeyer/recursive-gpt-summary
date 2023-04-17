@@ -6,6 +6,7 @@ import * as config from '../config'
 </script>
 
 <template>
+  <h1>Decay of a golden soul</h1>
   <div>
     <h2> 
       Hallo!
@@ -64,13 +65,16 @@ import * as config from '../config'
         Recursive GPT Summary on Github</a
       >
     </p>
-    <p>I'm happy to disclose all the thought's I had in the past.</p>
+    <p>I'm happy to disclose all the thought's I had in the past. The majority is in German.</p>
     <RouterLink :to="config.rootFileId">Start Exploring</RouterLink>
   </div>
 
 </template>
 
 <style scoped>
+div, h1 {
+  margin: 2rem;
+}
 button {
   padding: 0.5rem; 
   margin: 0.5rem 0 ; 

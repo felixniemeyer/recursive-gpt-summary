@@ -1,13 +1,23 @@
+# SVG und scroll 
+- links soll dann noch der Mindalys Zeitrahl eingebunden werden
+  - von mir aus auch scrollend
+
 # more
 - way to pick up process, when chatgpt has caused an error
 
-# location...
+# alignment
 - es wäre eigentlich super, 
   - wenn man für jede datei 
     - den start und 
     - exklusiven end character kennen würde
+    - was tun mit overlap: die mitte nehmen
+      - am anfang bei 0 beginnen
+      - am ende bis zum letzten char gehen
   - und dazu ein index pro level
     - dass man anhand eines progress die datei bestimmen kann
+  - und dann js scrolling 
+    - so dass in der vertikalen mitte
+    - immer ein character mit der gleichen Nummer ist
 
 # mindalys fusion => V2
 - const kernel über die Wörter bewegen

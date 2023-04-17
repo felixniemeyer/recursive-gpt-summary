@@ -11,7 +11,6 @@ load_dotenv()
 
 # open ai key
 openai.api_key = os.getenv("OPENAI_API_KEY")
-print(openai.api_key)
 
 CHARS_PER_TOKEN = 4.5
 
@@ -33,10 +32,10 @@ parser.add_argument('-ol', '--overlap', type=int, help='Number of chars to overl
 parser.add_argument('-cl', '--context', type=int, help='Number of chars from previous summary as context', 
                     required=False, default=300)
 parser.add_argument('-c', '--chunksize', type=int, help='Target chunk size in tokens', required=False, 
-                    default=2500)
+                    default=2400)
 # factor has to be less than 1
 parser.add_argument('-f', '--factor', type=int, help='Factor by which chatGPT should reduce by summary', required=False, 
-                    default=0.33)
+                    default=0.3)
 
 parser.add_argument('-fk', '--fake-summary', action='store_true', help='Use fake summarization instead of chatGPT', 
                     default=False)
@@ -62,6 +61,9 @@ if not os.path.exists(original_dir):
     print("Directory " + original_dir + " does not exist")
     exit(1)
 
+# make dir maps 
+Path(args.directory + '/maps').mkdir(parents=True, exist_ok=True)
+
 condense_prompt = "Verwende etwa <wc> Wörter und schreibe in der Ich-Perspektive"
 
 def summarize(context, thoughts):
@@ -71,8 +73,6 @@ def summarize(context, thoughts):
         return chatGPTSummarize(context, thoughts)
 
 def chatGPTSummarize(context, thoughts):
-    print("Summarizing " + thoughts)
-
     messages = []
 
     messages.append({
@@ -94,16 +94,16 @@ def chatGPTSummarize(context, thoughts):
         "role": "system", "content": condense_prompt.replace("<wc>", str(target_word_count))
     })
 
-    print("Prompts: ", messages)
+    print('request: ' + str(messages))
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
     )
 
-    summary = response["choices"][0]["message"]["content"]
+    print('response: ' + str(response))
 
-    print("Summary: " + summary)
+    summary = response["choices"][0]["message"]["content"]
 
     return summary
 
@@ -119,7 +119,12 @@ def fakeSummarize(context, thoughts):
     return summary
 
 
-def processFolder(fromFolderName, level, origins, summaries):
+def processFolder(fromFolderName, level, origins, summaries, previous_char_map):
+    print('processing folder ' + fromFolderName)
+
+    file_list = []
+    char_map = []
+
     fromFolder = args.directory + '/' + fromFolderName
     toFolder = args.directory + '/' + str(level)
     Path(toFolder).mkdir(parents=True, exist_ok=True)
@@ -130,13 +135,37 @@ def processFolder(fromFolderName, level, origins, summaries):
     context = ""
     file_counter = 0
 
+    def loadExistingSummary(): 
+        nonlocal toFolder
+        nonlocal file_counter
+
+        # pad file_counter with zeros
+        new_file_name = str(file_counter).zfill(5)
+
+        already_existing_summary = None
+
+        try: 
+            path = toFolder + '/' + new_file_name
+            with open(path, "r") as f:
+                already_existing_summary = f.read()
+            print('found ' + path + '. Skipping')
+        except:
+            pass
+
+        return already_existing_summary
+
+
+
     def createFile(summary): 
         nonlocal file_counter
         nonlocal origin_files
         nonlocal origins
         nonlocal summaries
 
-        with open(toFolder + '/' + str(file_counter), "w") as f:
+        # pad file_counter with zeros
+        new_file_name = str(file_counter).zfill(5)
+
+        with open(toFolder + '/' + new_file_name, "w") as f:
             f.write(summary)
 
         file_id = str(level) + '/' + str(file_counter)
@@ -150,13 +179,42 @@ def processFolder(fromFolderName, level, origins, summaries):
 
         return summary
 
+    file_list = sorted(os.listdir(fromFolder))
 
-    for filename in sorted(os.listdir(fromFolder)):
+    most_recent_file_start = 0
+    most_recent_file_end = 0
+
+    build_initial_char_map = False
+    if len(previous_char_map) == 0:
+        build_initial_char_map = True
+
+    sanity_check = 0
+
+    file_index = 0
+    for filename in file_list:
         current_file = fromFolderName + '/' + filename
         origin_files.append(current_file)
         with open(fromFolder + '/' + filename, "r") as f:
-            print("reading " + filename)
-            thoughts += f.read()
+            most_recent_thoughts = f.read()
+            if(most_recent_thoughts == ''): 
+                continue
+            most_recent_file_length = len(most_recent_thoughts)
+            sanity_check += most_recent_file_length
+            if build_initial_char_map: 
+                most_recent_file_start = most_recent_file_end
+                most_recent_file_end += most_recent_file_length
+                previous_char_map.append(most_recent_file_end) 
+                print(file_index)
+            else: 
+                most_recent_file_start = most_recent_file_end
+                print(file_index)
+                if(file_index == 330): 
+                    print(previous_char_map)
+                    print(len(previous_char_map))
+                most_recent_file_end = previous_char_map[file_index]
+                
+            previous_thoughts_length = len(thoughts)
+            thoughts += most_recent_thoughts
 
             char_count = len(thoughts) + len(args.prepromt) + len(context) + len(condense_prompt) + args.overlap
             if(len(context) > 0):
@@ -166,9 +224,12 @@ def processFolder(fromFolderName, level, origins, summaries):
                 excess_chars = char_count - args.chunksize * CHARS_PER_TOKEN
                 chars = int(len(thoughts) - excess_chars)
 
-                print("Summarizing " + str(chars) + " chars")
+                chunk = thoughts[:chars]
+                print('chunk: ' + chunk)
 
-                summary = summarize(context, thoughts[:chars])
+                summary = loadExistingSummary()
+                if summary == None: 
+                    summary = summarize(context, chunk)
                 createFile(summary)
 
                 # create new set of origin files 
@@ -177,20 +238,39 @@ def processFolder(fromFolderName, level, origins, summaries):
                 context = summary[-args.context:]
                 thoughts = thoughts[chars - args.overlap:]
 
-    summary = summarize(context, thoughts)
+                progress_in_most_recent_file = (chars - previous_thoughts_length) / most_recent_file_length
+                most_recent_file_width = most_recent_file_end - most_recent_file_start
+                char_map.append(
+                    int(progress_in_most_recent_file * most_recent_file_width + most_recent_file_start)
+                )
+                    
+        file_index += 1
+
+    summary = loadExistingSummary()
+    if summary == None: 
+        summary = summarize(context, thoughts)
+    char_map.append(most_recent_file_end)
     createFile(summary)
 
-    return file_counter
+    return file_counter, file_list, char_map
+
+def saveCharMap(char_map, level): 
+    with open(args.directory + '/maps/' + level + '.json', 'w') as f:
+        json.dump(char_map, f)
 
 origins = {}
 summaries = {} # a file may have 2 files as a summary, when it's contents are split
 
 level = 1
-file_count = processFolder('original', level, origins, summaries)
+original_char_map = []
+file_count, file_list, char_map  = processFolder('original', level, origins, summaries, original_char_map)
+saveCharMap(original_char_map, 'original')
+saveCharMap(char_map, str(level))
 
 while file_count > 1: 
-    file_count = processFolder(str(level), level + 1, origins, summaries)
+    file_count, file_list, char_map = processFolder(str(level), level + 1, origins, summaries, char_map)
     level += 1
+    saveCharMap(char_map, str(level))
 
 # write origins and summaries into json files
 with open(args.directory + '/origins.json', 'w') as f:

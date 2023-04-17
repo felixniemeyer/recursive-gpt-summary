@@ -102,17 +102,6 @@ loadData()
 
 <template>
   <div class=left>
-    <h2> summarized texts </h2>
-    <p v-if=originClickable class=info>
-      click any text to bring it to the right side
-    </p>
-    <p v-else class=info>
-      you are looking at the original texts
-    </p>
-    <pre v-for="text, i in originTexts" :key="i"
-         :class="{clickable: originClickable}"
-         @click="originClickable && navigate(originFiles[i])">{{ text }}</pre>
-  </div><div class=right>
     <h2> summary </h2>
     <p class=info>
       level {{ level }}
@@ -130,8 +119,18 @@ loadData()
     <a class=button v-if="nextId != undefined"
       :href="`/read/${level}/${nextId}`">
       <span>&#x25BC;</span></a>
-  </div>
-</template>
+  </div><div class=right>
+    <h2> {{ originClickable ? 'summarized' : 'original' }} texts </h2>
+    <p v-if=originClickable class=info>
+      click any text to bring it to the right side
+    </p>
+    <p v-else class=info>
+      you are looking at the original texts
+    </p>
+    <pre v-for="text, i in originTexts" :key="i"
+         :class="{clickable: originClickable}"
+         @click="originClickable && navigate(originFiles[i])">{{ text }}</pre>
+  </div></template>
 
 <style scoped>
 .left, .right {

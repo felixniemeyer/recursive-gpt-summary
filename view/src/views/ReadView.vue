@@ -122,7 +122,7 @@ loadData()
   </div><div class=right>
     <h2> {{ originClickable ? 'summarized' : 'original' }} texts </h2>
     <p v-if=originClickable class=info>
-      click any text to bring it to the right side
+      click any text to see the texts it summarizes
     </p>
     <p v-else class=info>
       you are looking at the original texts
@@ -131,7 +131,6 @@ loadData()
          :class="{clickable: originClickable}"
          @click="originClickable && navigate(originFiles[i])">{{ text }}</pre>
   </div></template>
-
 <style scoped>
 .left, .right {
   display: inline-block;

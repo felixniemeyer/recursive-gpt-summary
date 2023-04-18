@@ -1,0 +1,16 @@
+# v2
+
+- we need many columns as we have 
+  - one for the title
+  - one for each summary level 
+  - one for the originals
+  - one for the svg
+
+  - levels + original (0) + title
+  - the title is on the left
+
+- we show as many columns as height > column width
+  - 
+
+- SVG gen
+  - step size in chars

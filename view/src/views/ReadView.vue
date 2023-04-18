@@ -1,11 +1,11 @@
 <script setup lang=ts>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import axios from 'axios'
 
 axios.interceptors.request.use((config: any) => {
-  config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
+  //config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
   return config;
 });
 
@@ -28,8 +28,8 @@ const summaryText = ref(undefined as string | undefined)
 const originTexts = ref([] as string[])
 const originFiles = ref([] as string[])
 
-const previousId = ref(undefined as number | undefined)
-const nextId = ref(undefined as number | undefined)
+const previousId = ref(undefined as string | undefined)
+const nextId = ref(undefined as string | undefined)
 
 const summaryFile = ref(undefined as string | undefined)
 
@@ -52,12 +52,16 @@ async function loadData() {
   nextId.value = undefined
   if (typeof id === 'string') {
     let idInt = parseInt(id)
+    console.log(idInt)
     if (idInt > 0) {
-      previousId.value = idInt - 1
+      previousId.value = ('0000' + (idInt - 1)).slice(-5)
     }       // check if file for next id does exists
-    axios.head(`/volume/${level}/${idInt + 1}`).then((response) => {
+    // pad with zeros 5 digits without padStart
+    const potentialNextId = ('0000' + (idInt + 1)).slice(-5)
+
+    axios.head(`/volume/${level}/${potentialNextId}`).then((response) => {
       if(response.status === 200) {
-        nextId.value = idInt + 1
+        nextId.value = potentialNextId
       }
     }).catch(() => {
       console.log('the above failed axios request is ok')

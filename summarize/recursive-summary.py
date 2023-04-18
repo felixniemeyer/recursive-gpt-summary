@@ -168,7 +168,7 @@ def processFolder(fromFolderName, level, origins, summaries, previous_char_map):
         with open(toFolder + '/' + new_file_name, "w") as f:
             f.write(summary)
 
-        file_id = str(level) + '/' + str(file_counter)
+        file_id = str(level) + '/' + str(file_counter).zfill(5)
         origins[file_id] = origin_files
         for origin in origin_files:
             if origin not in summaries:

@@ -7,8 +7,7 @@ import axios from 'axios'
 const base = import.meta.env.BASE_URL
 
 axios.interceptors.request.use((config: any) => {
-  //config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
-  // prepend the base url to the request url
+  config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
   config.url = base + config.url
   return config;
 });

@@ -4,8 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 
 import axios from 'axios'
 
+const base = import.meta.env.BASE_URL
+
 axios.interceptors.request.use((config: any) => {
   //config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
+  // prepend the base url to the request url
+  config.url = base + config.url
   return config;
 });
 
@@ -111,7 +115,7 @@ loadData()
       level {{ level }}
     </p>
     <a class=button v-if="previousId != undefined"
-      :href="`/read/${level}/${previousId}`">
+                    :href="`${base}read/${level}/${previousId}`">
       <span>&#x25B2; </span></a>
     <p class=info>
       file {{ id }}
@@ -121,7 +125,7 @@ loadData()
       @click="summaryFile !== undefined && navigate(summaryFile)"
     >{{ summaryText }}</pre> 
     <a class=button v-if="nextId != undefined"
-      :href="`/read/${level}/${nextId}`">
+                    :href="`${base}read/${level}/${nextId}`">
       <span>&#x25BC;</span></a>
   </div><div class=right>
     <h2> {{ originClickable ? 'summarized' : 'original' }} texts </h2>

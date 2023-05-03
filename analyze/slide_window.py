@@ -1,15 +1,31 @@
+import argparse
+import os
 
-# save word_occurences to file
-with open("word_occurences.txt", "w") as f:
-    for word in word_occurences:
-        f.write(word + " " + str(word_occurences[word]) + "\n")
+from scanner import Scanner 
+from file_utils import load_word_occurences, ensure_trailing_slash, load_meta, save_word_curves, save_meta
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("project_path", help="read and write files from this directory", default="")
+parser.add_argument("-moc", "--min_occurences", help="minimum occurences of a word", default=10)
+parser.add_argument("-kr", "--kernel_radius", help="kernel radius in characters", default=20000)
+
+args = parser.parse_args()
+
+# append slash to output if it does not exist
+args.project_path = ensure_trailing_slash(args.project_path)
+
+if args.min_occurences < 2:
+    print("min_occurences must be at least 2")
+    exit()
+
+# load meta
+meta = load_meta(args.project_path)
+input_path = meta['input_path']
+total_chars = meta['total_chars']
 
 # load word occurences from file
-word_occurences = {}
-with open("word_occurences.txt", "r") as f:
-    for line in f:
-        line = line.split()
-        word_occurences[line[0]] = int(line[1])
+word_occurences = load_word_occurences(args.project_path)
 
 # keep a window of x chars and parse the text
 # at the beginnging ( add to occurences ) and at the end ( subtract from occurences )
@@ -63,13 +79,22 @@ class Window:
             self.windowTailCounter.handleChar(self.chars.pop(0))
             self.location += 1
 
+file_list = sorted(os.listdir(input_path))
+
 window = Window()
 for file_name in file_list:
-    with open(args.path + "/" + file_name, "r") as f:
+    with open(input_path + file_name, "r") as f:
         for char in f.read():
             window.handleChar(char)
 
 # make a closing entry for every word
 for word in word_curve_x: 
-    word_curve_x[word].append(total_chars + 1)
+    word_curve_x[word].append(meta['total_chars'] + 1)
     word_curve_y[word].append(0)
+
+# save word curves
+save_word_curves(args.project_path, word_curve_x, word_curve_y)
+
+# save meta 
+meta["kernel_radius"] = args.kernel_radius
+save_meta(args.project_path, meta)

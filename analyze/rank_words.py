@@ -21,12 +21,14 @@ kernel_radius = meta["kernel_radius"]
 # load word curves from file
 (word_curve_x, word_curve_y) = load_word_curves(args.project_path)
 
+word_frequencies = {}
 word_max_frequencies = {}
+word_max_frequencies_at = {}
 word_variances = {}
 word_scores = {}
 
 for word in word_curve_x:
-    window_start_chars = word_curve_x[word]
+    window_center_chars = word_curve_x[word]
     words_in_window = word_curve_y[word]
 
     max_frequency = 0
@@ -38,23 +40,30 @@ for word in word_curve_x:
     normalize_factor = total_chars / (2 * kernel_radius) / word_occurences[word]
 
     frequency = 0
+    max_frequency_at = 0 
+
+    frequencies = []
 
     varianceSum = 0
-    datapoints = len(window_start_chars)
+    datapoints = len(window_center_chars)
 
     for i in range(datapoints):
         if i > 0:
             deviation = frequency - 1
-            length = window_start_chars[i] - window_start_chars[i-1]
+            length = window_center_chars[i] - window_center_chars[i-1]
             varianceSum += deviation * deviation * length
+            frequencies.append(frequency) 
 
         frequency = words_in_window[i] * normalize_factor
 
         if frequency > max_frequency:
             max_frequency = frequency
+            max_frequency_at = window_center_chars[i]
 
     variance = varianceSum / (datapoints - 1) 
 
+    word_frequencies[word] = frequencies
+    word_max_frequencies_at[word] = max_frequency_at
     word_variances[word] = variance
     word_max_frequencies[word] = max_frequency
     word_scores[word] = variance * word_occurences[word] ** 2
@@ -66,7 +75,9 @@ save_ranked_words(
     args.project_path, 
     words_sorted_by_score, 
     word_occurences,
+    word_variances, 
     word_max_frequencies,
-    word_variances
+    word_max_frequencies_at, 
+    word_frequencies
 )
 

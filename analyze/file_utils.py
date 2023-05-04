@@ -46,33 +46,50 @@ def load_word_curves(path):
     with open(path + "word_curves.pickle", "rb") as f:
         return pickle.load(f)
 
-def save_ranked_words(path, words_sorted_by_score, word_occurences, word_max_frequencies, word_variances): 
+def save_ranked_words(
+    path, 
+    words, 
+    occurences, 
+    variances, 
+    max_frequencies, 
+    max_frequencies_ats, 
+    frequencies): 
     # write selected words to file
     with open(path + 'ranked_words.csv', 'w') as f:
-        f.writelines('word;occurences;max_frequency;local_frequency_variance;score\n')
-        for word in words_sorted_by_score:
+        for word in words:
             f.writelines(
                 word + ';' + 
-                str(word_occurences[word]) + ';' + 
-                str(word_max_frequencies[word]) + ';' + 
-                str(word_variances[word]) + '\n'
+                str(occurences[word]) + ';' + 
+                str(variances[word]) + ';' + 
+                str(max_frequencies[word]) + ';' + 
+                str(max_frequencies_ats[word]) + ';' + 
+                ','.join([str(f) for f in frequencies[word]]) + '\n'
             )
 
 def load_ranked_words(path): 
     words_sorted_by_score = []
     word_occurences = {}
-    word_max_frequencies = {}
     word_variances = {}
+    word_max_frequencies = {}
+    word_max_frequencies_ats = {}
+    word_frequencies = {}
     with open(path + 'ranked_words.csv', 'r') as f: 
-        f.readline()
         for line in f:
-            print(line) 
             values = line.split(';')
             word = values[0]
             words_sorted_by_score.append(word)
             word_occurences[word] = int(values[1])
-            word_max_frequencies[word] = float(values[2])
-            word_variances[word] = float(values[3])
+            word_variances[word] = float(values[2])
+            word_max_frequencies[word] = float(values[3])
+            word_max_frequencies_ats[word] = float(values[4])
+            word_frequencies[word] = [float(v) for v in values[5].split(',')]
 
-    return (words_sorted_by_score, word_occurences, word_max_frequencies, word_variances)
+    return (
+        words_sorted_by_score, 
+        word_occurences, 
+        word_variances, 
+        word_max_frequencies, 
+        word_max_frequencies_ats, 
+        word_frequencies
+    )
 

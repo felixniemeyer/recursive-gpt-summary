@@ -1,48 +1,57 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import * as config from './config'
+import axios from 'axios'
+import TitleColumn from './components/TitleColumn.vue'
+
+const base = import.meta.env.BASE_URL
+
+axios.interceptors.request.use((config: any) => {
+  config.headers['cache-control'] = 'max-age=2147483647'; // always use cache, content never changes 
+  config.url = base + config.url
+  return config;
+});
+
+// parse charIndex (behind #)
+const charIndex = window.location.hash.slice(1)
+
+async function init() {
+  // load levels
+  const levels = await axios.get('/volume/levels', {responseType: 'text'})
+
+  // setup columns
+
+  // title column
+
+  // text columns
+
+  // svg column
+}
 
 </script>
 
 <template>
-  <RouterView />
+  <div id=container>
+    <TitleColumn />
+    <TitleColumn />
+    <TitleColumn />
+    <TitleColumn />
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-nav {
-  width: 100%;
-  text-align: center;
-  font-size: 1rem;
-}
-
-a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-header {
+#container {
   display: flex;
-  place-items: center;
+  overflow-x: scroll;
+  height: 100vh;
 }
 
-header .wrapper {
-  display: flex;
-  place-items: flex-start;
-  flex-wrap: wrap;
+.column {
+  flex: 0 0 auto; /* set flex-grow, flex-shrink and flex-basis to 0, so the boxes don't stretch */
+  width: 300px; /* set a fixed width for the boxes */
+  margin-right: 10px; /* add margin between the boxes */
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 1rem; 
+  overflow-y: scroll;
 }
 
 </style>

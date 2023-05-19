@@ -52,7 +52,7 @@ async function init() {
   position: fixed; 
   left: 0; 
   height: 2rem; 
-  width: 100vh; 
+  width: 100vw; 
 }
 
 #top-fadein {

@@ -1,6 +1,8 @@
 body {
+  margin:0 ;
   font-family: sans-serif;
-  color: #222; 
+  color: #fed; 
+  background-color: #0b0808; 
 }
 
 #container {
@@ -12,18 +14,20 @@ body {
 #top-fadein, #bottom-fadein {
   position: fixed; 
   left: 0; 
-  height: 2rem; 
-  width: 100vh; 
+  height: 3rem; 
+  width: 100vw; 
+  pointer-events: none;
 }
 
 #top-fadein {
   top: 0; 
-  background: linear-gradient(to bottom, #ffff 20%, #fff0);
+  background-color: ; 
+  background: linear-gradient(to bottom, #0b0808 10%, #0000);
 }
   
 #bottom-fadein {
   bottom: 0; 
-  background: linear-gradient(to bottom, #fff0, #ffff 80%);
+  background: linear-gradient(to bottom, #0000, #0b0808 90%);
 }
 
 .column {
@@ -40,15 +44,40 @@ body {
   font-size: 2rem;
   line-height: 100vh;
   overflow-y: hidden;
-  color: #333; 
+  color: #cba; 
   padding: 1rem; 
   user-select: none;
 }
 
 .text {
+  position: relative;
   width: max(40vw, 40vh);
+}
+
+.scroll {
+  position: relative;
+  margin: 0; 
+}
+
+.text p {
+  position: absolute;
+  left: 0; 
+  width: 100%;
+  word-wrap: break-word;
 }
 
 #title-page {
   width: max(50vw, 50vh);
+}
+
+a {
+  color: #acf;
+}
+
+a:visited {
+  color: #f9e;
+}
+
+* {
+  outline: 1px solid #f00;
 }

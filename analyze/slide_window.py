@@ -7,8 +7,8 @@ from file_utils import load_word_occurences, ensure_trailing_slash, load_meta, s
 parser = argparse.ArgumentParser()
 
 parser.add_argument("project_path", help="read and write files from this directory", default="")
-parser.add_argument("-moc", "--min_occurences", help="minimum occurences of a word", default=10)
-parser.add_argument("-kr", "--kernel_radius", help="kernel radius in characters", default=20000)
+parser.add_argument("-moc", "--min_occurences", help="minimum occurences of a word", default=10, type=int)
+parser.add_argument("-kr", "--kernel_radius", help="kernel radius in characters", default=20000, type=int)
 
 args = parser.parse_args()
 

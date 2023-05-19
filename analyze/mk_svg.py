@@ -6,11 +6,11 @@ from file_utils import load_word_curves, load_ranked_words, ensure_trailing_slas
 parser = argparse.ArgumentParser()
 
 parser.add_argument("project_path", help="directory to write files to", default="")
-parser.add_argument("-x", "--size_x", help="svg canvas size x", default=700)
-parser.add_argument("-y", "--size_y", help="svg canvas size y", default=12000)
+parser.add_argument("-x", "--size_x", help="svg canvas size x", default=700, type=int)
+parser.add_argument("-y", "--size_y", help="svg canvas size y", default=12000, type=int)
 parser.add_argument("-s", "--stroke_width", help="svg stroke_width", default=2)
 parser.add_argument("-f", "--font_size", help="font size", default=16)
-parser.add_argument("-n", "--number_of_words", help="maximal number of words (ranked highest). 0 = no limit", default=160)
+parser.add_argument("-n", "--number_of_words", help="maximal number of words (ranked highest). 0 = no limit", default=160, type=int)
 parser.add_argument("-t", "--threshold", help="don't show lines where normalized frequency < t", default=0.3)
 parser.add_argument("-ls", "--label_space", help="how much space to leave for labels", default=0.3)
 
@@ -49,7 +49,6 @@ width = args.size_x * (1 - args.label_space) / (1 - args.threshold)
 included_words = []
 
 for word in words_sorted_by_score:
-    print(word)
     char_indices = word_curves_char_index[word]
     frequencies = word_frequencies[word]
 
@@ -163,14 +162,9 @@ while i < len(included_words):
 
     check_forward()
 
-    if(included_words[i][0] == "vincent"): 
-        print ("{} {} {} {}".format(i, top_i, bottom_i, count_i))
-
     if top_i == bottom_i: 
-        print('no change') 
         i += 1
     else: 
-        print('distribute') 
         # redistribute words
         start_y = center_y - (count_i * half_line_height) + half_line_height
         c = 0
